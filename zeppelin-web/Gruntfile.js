@@ -102,7 +102,7 @@ module.exports = function(grunt) {
       build: {
         options: {
           fontPath: '<%= yeoman.app %>/fonts/',
-          httpPath: '../fonts/',
+          httpPath: 'http://fonts.useso.com/fonts/',
           cssFile: '<%= yeoman.app %>/fonts/google-fonts.css',
           formats: {
             eot: true,

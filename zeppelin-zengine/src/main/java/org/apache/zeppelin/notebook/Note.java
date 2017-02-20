@@ -161,7 +161,7 @@ public class Note implements Serializable, ParagraphJobListener {
    */
   public String getFolderId() {
     String notePath = getName();
-
+    String user = getLastParagraph().getUser();
     // Ignore first '/'
     if (notePath.charAt(0) == '/')
       notePath = notePath.substring(1);
@@ -199,6 +199,8 @@ public class Note implements Serializable, ParagraphJobListener {
 
     if (name.indexOf('/') >= 0 || name.indexOf('\\') >= 0) {
       name = normalizeNoteName(name);
+    } else {
+      name = "/" + getLastParagraph().getUser() + "/" + name;
     }
     this.name = name;
 

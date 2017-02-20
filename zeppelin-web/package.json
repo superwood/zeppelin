@@ -7,7 +7,7 @@
   },
   "scripts": {
     "clean": "rimraf dist && rimraf .tmp",
-    "postinstall": "bower install --silent && grunt googlefonts",
+    "postinstall": "bower install  && grunt googlefonts",
     "prebuild": "npm-run-all clean",
     "build": "grunt pre-webpack-dist && webpack && grunt post-webpack-dist",
     "predev": "grunt pre-webpack-dev",
@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "grunt-angular-templates": "^0.5.7",
-    "grunt-dom-munger": "^3.4.0"
+    "grunt-dom-munger": "^3.4.0",
+    "grunt-local-googlefont": "^0.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.5.4",

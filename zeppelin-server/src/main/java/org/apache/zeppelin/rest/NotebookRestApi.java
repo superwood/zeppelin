@@ -349,11 +349,14 @@ public class NotebookRestApi {
         p.setText(paragraphRequest.getText());
       }
     }
+
     note.addParagraph(subject); // add one paragraph to the last
     String noteName = request.getName();
     if (noteName.isEmpty()) {
       noteName = "Note " + note.getId();
     }
+
+
 
     note.setName(noteName);
     note.persist(subject);
