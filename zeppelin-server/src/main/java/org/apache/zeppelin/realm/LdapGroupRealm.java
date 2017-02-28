@@ -21,6 +21,9 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.ldap.JndiLdapRealm;
 import org.apache.shiro.realm.ldap.LdapContextFactory;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.AuthenticationInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +54,64 @@ public class LdapGroupRealm extends JndiLdapRealm {
     return new SimpleAuthorizationInfo(roleNames);
   }
 
+  /**
+   *  提交用户认证之前首先添加权限检测
+  **/
+  @Override
+  protected AuthenticationInfo createAuthenticationInfo(AuthenticationToken  token,
+                                                          Object  ldapPrincipal,
+                                                          Object  ldapCredentials,
+                                                          LdapContext  ldapContext)
+      throws NamingException{
+
+    String userName = (String) token.getPrincipal();
+
+    SearchControls searchCtls = new SearchControls();
+    searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+
+    String searchFilter = "(&(objectClass=*)(uid=" + userName + "))";
+    Object[] searchArguments = new Object[]{userName};
+
+    NamingEnumeration<?> answer = ldapContext.search(
+            String.valueOf(ldapContext.getEnvironment().get("ldap.searchBase")),
+            searchFilter,
+            searchArguments,
+            searchCtls);
+
+    if (!answer.hasMoreElements()) {
+      return null;
+    }
+
+    SearchResult sr = (SearchResult) answer.next();
+    Attributes attrs = sr.getAttributes();
+
+    if (attrs == null) {
+      return null;
+    }
+
+    NamingEnumeration<?> ae = attrs.getAll();
+    while (ae.hasMore()) {
+
+      Attribute attr = (Attribute) ae.next();
+
+      if (attr.getID().equals("displayName")) {
+
+        String platforms = (String) attr.get();
+        String[] platformIds = platforms.split(";");
+
+        if (platformIds != null){
+          for (String platformId : platformIds){
+            if ("zeppelin".equals(platformId)){
+              return new SimpleAuthenticationInfo(token.getPrincipal(),
+                      token.getCredentials(),
+                      getName());
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
 
   public Set<String> getRoleNamesForUser(String username,
                                          LdapContext ldapContext,
@@ -61,7 +122,8 @@ public class LdapGroupRealm extends JndiLdapRealm {
       SearchControls searchCtls = new SearchControls();
       searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 
-      String searchFilter = "(&(objectClass=groupOfNames)(member=" + userDnTemplate + "))";
+      String searchFilter = "(&(objectClass=*)(uid=" + username + "))";
+
       Object[] searchArguments = new Object[]{username};
 
       NamingEnumeration<?> answer = ldapContext.search(
@@ -77,12 +139,21 @@ public class LdapGroupRealm extends JndiLdapRealm {
           NamingEnumeration<?> ae = attrs.getAll();
           while (ae.hasMore()) {
             Attribute attr = (Attribute) ae.next();
-            if (attr.getID().equals("cn")) {
-              roleNames.add((String) attr.get());
+            if (attr.getID().equals("givenName")) {
+              String groupNames = (String) attr.get();
+              String[] groupIds = groupNames.split(";");
+
+              if (groupIds != null){
+                for (String groupId : groupIds){
+                  LOG.info("group id : " + groupId);
+                  roleNames.add(groupId);
+                }
+              }
             }
           }
         }
       }
+
       return roleNames;
 
     } catch (Exception e) {
