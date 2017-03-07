@@ -246,7 +246,12 @@ public class Notebook implements NoteEventListener {
     if (sourceNote == null) {
       throw new IllegalArgumentException(sourceNoteId + "not found");
     }
+
     Note newNote = createNote(subject);
+    List<Paragraph> paragraphs = sourceNote.getParagraphs();
+    for (Paragraph p : paragraphs) {
+      newNote.addCloneParagraph(p);
+    }
     if (newNoteName != null) {
       newNote.setName(newNoteName);
     } else {
@@ -255,11 +260,6 @@ public class Notebook implements NoteEventListener {
     // Copy the interpreter bindings
     List<String> boundInterpreterSettingsIds = getBindedInterpreterSettingsIds(sourceNote.getId());
     bindInterpretersToNote(subject.getUser(), newNote.getId(), boundInterpreterSettingsIds);
-
-    List<Paragraph> paragraphs = sourceNote.getParagraphs();
-    for (Paragraph p : paragraphs) {
-      newNote.addCloneParagraph(p);
-    }
 
     noteSearchService.addIndexDoc(newNote);
     newNote.persist(subject);

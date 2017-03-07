@@ -71,7 +71,7 @@ public class Note implements Serializable, ParagraphJobListener {
 
   private String name = "";
   private String id;
-
+  private String user = null;
   private transient ZeppelinConfiguration conf = ZeppelinConfiguration.create();
 
   private Map<String, List<AngularObject>> angularObjects = new HashMap<>();
@@ -200,7 +200,9 @@ public class Note implements Serializable, ParagraphJobListener {
     if (name.indexOf('/') >= 0 || name.indexOf('\\') >= 0) {
       name = normalizeNoteName(name);
     } else {
-      name = "/" + getLastParagraph().getUser() + "/" + name;
+      if ( null != user ) {
+        name = "/" + user + "/" + name;
+      }
     }
     this.name = name;
 
@@ -675,6 +677,7 @@ public class Note implements Serializable, ParagraphJobListener {
 
   public void persist(AuthenticationInfo subject) throws IOException {
     Preconditions.checkNotNull(subject, "AuthenticationInfo should not be null");
+    user = subject.getUser();
     stopDelayedPersistTimer();
     snapshotAngularObjectRegistry(subject.getUser());
     index.updateIndexDoc(this);

@@ -210,6 +210,7 @@ public class NotebookServer extends WebSocketServlet
           new AuthenticationInfo(messagereceived.principal, messagereceived.ticket);
 
       /** Lets be elegant here */
+      LOG.info("messagereceived {}", messagereceived.toString());
       switch (messagereceived.op) {
           case LIST_NOTES:
             unicastNoteList(conn, subject, userAndRoles);
@@ -352,7 +353,7 @@ public class NotebookServer extends WebSocketServlet
             break;
       }
     } catch (Exception e) {
-      LOG.error("Can't handle message", e);
+      LOG.error("Can't handle message {}", e.getMessage());
     }
   }
 
@@ -1141,6 +1142,7 @@ public class NotebookServer extends WebSocketServlet
       Message fromMessage) throws IOException, CloneNotSupportedException {
     String noteId = getOpenNoteId(conn);
     String name = (String) fromMessage.get("name");
+    LOG.info("clone note {}", fromMessage.toString());
     Note newNote = notebook.cloneNote(noteId, name, new AuthenticationInfo(fromMessage.principal));
     AuthenticationInfo subject = new AuthenticationInfo(fromMessage.principal);
     addConnectionToNote(newNote.getId(), (NotebookSocket) conn);
