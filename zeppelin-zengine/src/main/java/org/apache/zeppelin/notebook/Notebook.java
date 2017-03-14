@@ -257,12 +257,17 @@ public class Notebook implements NoteEventListener {
     } else {
       newNote.setName("Note " + newNote.getId());
     }
+    logger.info("set Name over begin bound");
     // Copy the interpreter bindings
     List<String> boundInterpreterSettingsIds = getBindedInterpreterSettingsIds(sourceNote.getId());
+    logger.info("Get bound over");
     bindInterpretersToNote(subject.getUser(), newNote.getId(), boundInterpreterSettingsIds);
+    logger.info("bound interpres");
 
     noteSearchService.addIndexDoc(newNote);
+    logger.info("add note index doc");
     newNote.persist(subject);
+    logger.info("persist node");
     return newNote;
   }
 

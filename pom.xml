@@ -54,6 +54,7 @@
   <modules>
     <module>zeppelin-interpreter</module>
     <module>zeppelin-zengine</module>
+    <module>druid</module>
     <module>zeppelin-display</module>
     <module>spark-dependencies</module>
     <module>spark</module>
